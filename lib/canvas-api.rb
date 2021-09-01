@@ -68,6 +68,20 @@ module Canvas
       res
     end
 
+    def refresh_access_token(refresh_token)
+      raise "client_id required for oauth flow" unless @client_id
+      raise "secret required for oauth flow" unless @secret
+      raise "refresh required" unless refresh_token
+      @token = "ignore"
+      res = post("/login/oauth2/token",
+                 client_id: @client_id, client_secret: @secret,
+                 grant_type: 'refresh_token', refresh_token: refresh_token)
+      if res['access_token']
+        @token = res['access_token']
+      end
+      res
+    end
+
     def logout
       !!delete("/login/oauth2/token")['logged_out']
     end
