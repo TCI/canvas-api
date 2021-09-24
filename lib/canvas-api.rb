@@ -73,9 +73,19 @@ module Canvas
       raise "secret required for oauth flow" unless @secret
       raise "refresh required" unless refresh_token
       @token = "ignore"
-      res = post("/login/oauth2/token",
-                 client_id: @client_id, client_secret: @secret,
-                 grant_type: 'refresh_token', refresh_token: refresh_token)
+
+      begin
+        res = post("/login/oauth2/token",
+                   client_id: @client_id, client_secret: @secret,
+                   grant_type: 'refresh_token', refresh_token: refresh_token)
+      rescue => e
+        if e.message.include?('invalid_request')
+          raise 'invalid_grant'
+        else
+          raise
+        end
+      end
+
       if res['access_token']
         @token = res['access_token']
       end
