@@ -56,6 +56,7 @@ module Canvas
 
     def validate_setup(redirect_uri)
       raise "client_id required for oauth flow" unless @client_id
+      raise "secret required for oauth flow" unless @secret
       raise "invalid callback_url" unless (URI.parse(redirect_uri) rescue nil)
 
       @token = 'ignore'
