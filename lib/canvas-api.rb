@@ -54,6 +54,24 @@ module Canvas
       oauth_url(callback_url, "/auth/userinfo")
     end
 
+    def validate_setup(redirect_uri)
+      raise "client_id required for oauth flow" unless @client_id
+      raise "invalid callback_url" unless (URI.parse(redirect_uri) rescue nil)
+
+      @token = 'ignore'
+      endpoint = generate_uri('/login/oauth2/auth',
+                              client_id: @client_id,
+                              response_type: 'code',
+                              redirect_uri: redirect_uri)
+      request = get_request(endpoint)
+      response = request.run
+
+      # A successful setup will redirect the user to their login portal
+      return true if response.code.to_s.match(/3\d\d/)
+
+      raise response.body
+    end
+
     def retrieve_access_token(code, callback_url)
       raise "client_id required for oauth flow" unless @client_id
       raise "secret required for oauth flow" unless @secret
